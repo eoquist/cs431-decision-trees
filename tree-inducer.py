@@ -45,3 +45,68 @@ datum never existed.) Print out the accuracy on the left-out testing data as the
 your tree's data. Please do not print out the hundreds of trees you create for this step.
 
 """
+
+#  COMMENTS TO SELF ABIOVE TO BE DELETED
+
+"""
+Description of the program up here 
+
+This program implements uses hard-coding because it's tailored for a binary decision tree.
+Examples of this being:
+  - class labels are hard coded as class_1 and class_2
+  - child_entropy in information_gain gets the weighted_child entropy --> only 2 labels means the other is implied
+"""
+
+import argparse
+import math
+__author__ = "Emilee Oquist"    # Help ?
+__license__ = "MIT"
+__date__ = "March 2023"
+
+
+# create an ArgumentParser object
+parser = argparse.ArgumentParser(
+    description='Python program for creating a binary decision tree that predicts the political party (Republican or Democrat) of a representative based on voting data.')
+parser.add_argument('filename', type=str, help='Path to the data file to use')
+args = parser.parse_args()
+filename = args.filename
+
+# Hard-coding class labels
+class_1 = '-'
+class_2 = '+'
+
+
+def entropy(labels_list):
+    """
+    Computes the measure of impurity of training data for the binary tree.
+    The entropy of a set S in binary classification is  H(S) = -A log2(A) - B log2(B)
+    where A and B represent the two classes.
+
+    change up comment? also change p1 and p2
+    rewrite the math to be more my style
+    """
+    p1 = sum(1 for label in labels_list if label == 1) / len(labels_list)
+    p2 = 1 - p1
+    if p1 == 0 or p2 == 0:
+        return 0
+    else:
+        return -(p1 * math.log2(p1)) - (p2 * math.log2(p2))
+
+
+def information_gain(dataset, labels, feature):
+    """
+    Measure the quality (information gain) of a binary split on a feature.
+
+    change comment
+    watch a video or two on decision trees
+    """
+    # Compute the entropy of the parent node
+    parent_entropy = entropy(labels)
+
+    # Compute the entropy of the child nodes -
+    counts = [sum(labels == value) for value in [class_1, class_2]]
+    child_entropy = sum([(counts[i]/sum(counts)) *
+                        entropy(labels[dataset[feature] == i]) for i in [0, 1]])
+
+    # Compute the information gain
+    return parent_entropy - child_entropy

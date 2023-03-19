@@ -45,8 +45,13 @@ datum never existed.) Print out the accuracy on the left-out testing data as the
 your tree's data. Please do not print out the hundreds of trees you create for this step.
 
 """
-
+#
+#
+#
 #  COMMENTS TO SELF ABIOVE TO BE DELETED
+#
+#
+#
 
 """
 Description of the program up here 
@@ -59,6 +64,7 @@ Examples of this being:
 
 import argparse
 import math
+
 __author__ = "Emilee Oquist"    # Help ?
 __license__ = "MIT"
 __date__ = "March 2023"
@@ -75,6 +81,30 @@ filename = args.filename
 class_1 = '-'
 class_2 = '+'
 
+class DecisionTreeBinaryClassifier:
+    def __init__(self, max_depth=None):
+        self.max_depth = max_depth
+        self.tree = None
+
+    def fit(self, X, y):
+        self.tree = self.build_tree(X, y, depth=0)
+
+    def predict(self, X):
+        predictions = []
+        for sample in X:
+            node = self.tree
+            while node.is_leaf() is False:
+                if sample[node.feature] <= node.threshold:
+                    node = node.left_child
+                else:
+                    node = node.right_child
+            predictions.append(node.label)
+        return predictions
+
+    def build_tree(self, X, y, depth):
+        # Implement decision tree algorithm here
+        pass
+    
 
 def entropy(labels_list):
     """

@@ -56,9 +56,9 @@ your tree's data. Please do not print out the hundreds of trees you create for t
 """
 Description of the program up here 
 
-This program implements uses hard-coding because it's tailored for a binary decision tree.
+This program implements uses hard-coding because it's tailored for a decision tree with 3 classes.
 Examples of this being:
-  - class labels are hard coded as class_1 and class_2
+  - class labels are hard coded 
   - child_entropy in information_gain gets the weighted_child entropy --> only 2 labels means the other is implied
 """
 
@@ -80,9 +80,10 @@ filename = args.filename
 # Hard-coding class labels
 class_1 = '-'
 class_2 = '+'
+class_3 = '.'
 
 class DecisionTreeBinaryClassifier:
-    def __init__(self, max_depth=None):
+    def __init__(self, max_depth=None): # = None means optional
         self.max_depth = max_depth
         self.tree = None
 

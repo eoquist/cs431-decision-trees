@@ -72,17 +72,17 @@ __date__ = "March 2023"
 
 # create an ArgumentParser object
 parser = argparse.ArgumentParser(
-    description='Python program for creating a binary decision tree that predicts the political party (Republican or Democrat) of a representative based on voting data.')
+    description='Python program for creating a decision tree that predicts the political party (Republican or Democrat) of a representative based on voting data.')
 parser.add_argument('filename', type=str, help='Path to the data file to use')
 args = parser.parse_args()
 filename = args.filename
 
-# Hard-coding class labels
-class_1 = '-'
-class_2 = '+'
-class_3 = '.'
+# Hard-coded labels
+yea = '-'
+nay = '+'
+abstain = '.'
 
-class DecisionTreeBinaryClassifier:
+class DecisionTreeClassifier:
     def __init__(self, max_depth=None): # = None means optional
         self.max_depth = max_depth
         self.tree = None
@@ -110,18 +110,14 @@ class DecisionTreeBinaryClassifier:
 def entropy(labels_list):
     """
     Computes the measure of impurity of training data for the binary tree.
-    The entropy of a set S in binary classification is  H(S) = -A log2(A) - B log2(B)
-    where A and B represent the two classes.
-
-    change up comment? also change p1 and p2
-    rewrite the math to be more my style
+    H(s) = - SUM ( slog2(s) ) ?
     """
-    p1 = sum(1 for label in labels_list if label == 1) / len(labels_list)
-    p2 = 1 - p1
-    if p1 == 0 or p2 == 0:
-        return 0
-    else:
-        return -(p1 * math.log2(p1)) - (p2 * math.log2(p2))
+    portion = 0
+    summation = 0
+    for index in range(len(labels_list)):
+        portion = sum(1 for label in labels_list if label == labels_list[index]) / len(labels_list)
+        summation += (portion * math.log2(portion)) # only calculate entropy of + - ? how does the entropy function work?
+    return - summation
 
 
 def information_gain(dataset, labels, feature):
@@ -135,7 +131,7 @@ def information_gain(dataset, labels, feature):
     parent_entropy = entropy(labels)
 
     # Compute the entropy of the child nodes -
-    counts = [sum(labels == value) for value in [class_1, class_2]]
+    counts = [sum(labels == value) for value in [yea, nay, abstain]] # pretty sure this no longer makes sense
     child_entropy = sum([(counts[i]/sum(counts)) *
                         entropy(labels[dataset[feature] == i]) for i in [0, 1]])
 

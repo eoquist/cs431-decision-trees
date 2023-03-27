@@ -62,9 +62,9 @@ Examples of this being:
   - child_entropy in information_gain gets the weighted_child entropy --> only 2 labels means the other is implied
 """
 
+
 import argparse
 import math
-
 __author__ = "Emilee Oquist"    # Help ?
 __license__ = "MIT"
 __date__ = "March 2023"
@@ -82,8 +82,9 @@ yea = '-'
 nay = '+'
 abstain = '.'
 
+
 class DecisionTreeClassifier:
-    def __init__(self, max_depth=None): # = None means optional
+    def __init__(self, max_depth=None):  # = None means optional
         self.max_depth = max_depth
         self.tree = None
 
@@ -105,7 +106,7 @@ class DecisionTreeClassifier:
     def build_tree(self, X, y, depth):
         # Implement decision tree algorithm here
         pass
-    
+
 
 def entropy(labels_list):
     """
@@ -115,8 +116,10 @@ def entropy(labels_list):
     portion = 0
     summation = 0
     for index in range(len(labels_list)):
-        portion = sum(1 for label in labels_list if label == labels_list[index]) / len(labels_list)
-        summation += (portion * math.log2(portion)) # only calculate entropy of + - ? how does the entropy function work?
+        portion = sum(1 for label in labels_list if label ==
+                      labels_list[index]) / len(labels_list)
+        # only calculate entropy of + - ? how does the entropy function work?
+        summation += (portion * math.log2(portion))
     return - summation
 
 
@@ -131,9 +134,25 @@ def information_gain(dataset, labels, feature):
     parent_entropy = entropy(labels)
 
     # Compute the entropy of the child nodes -
-    counts = [sum(labels == value) for value in [yea, nay, abstain]] # pretty sure this no longer makes sense
+    # pretty sure this no longer makes sense
+    counts = [sum(labels == value) for value in [yea, nay, abstain]]
     child_entropy = sum([(counts[i]/sum(counts)) *
                         entropy(labels[dataset[feature] == i]) for i in [0, 1]])
 
     # Compute the information gain
     return parent_entropy - child_entropy
+
+
+def leave_one_out_cross_validation():
+    """
+    Second, you must estimate your decision tree’s accuracy. To do this, you will use
+    leave-one-out-cross-validation. Loop through every datum. For that datum, exclude it from
+    the calculation and create a new decision tree as was done above. Then after it has been
+    trained and tuned, test it on the left-out datum. Do this for all your data. (Note that when
+    taking out every fourth datum to be the tuning set, you should do this as if the testing
+    datum never existed.) Print out the accuracy on the left-out testing data as the estimate of
+    your tree’s data. Please do not print out the hundreds of trees you create for this step.
+    Your file should be called tree-inducer.py. Its single command-line argument will be the
+    data file to use.
+    """
+    pass

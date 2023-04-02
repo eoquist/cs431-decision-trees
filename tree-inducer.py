@@ -17,19 +17,6 @@ to determine what is the best question to ask at each stage. Some other implemen
 
 ============================================
 
-First, you must create a decision tree and print it. To do this, there will be no test
-set. To create your tuning set, separate out every fourth element starting with the first.
-(So your tuning set will be element 0, element 4, element 8, and so on.) Pruning the tree
-is done by assessing your entire tree's current accuracy on the tuning set, and its accuracy
-when each internal node is pruned. (A pruned node is one that is replaced by a leaf that
-classifies a rep based on the majority of representatives in the training set who would have
-reached that node.) If the best pruned tree is at least as good as the overall tree, making
-the prune permanent and repeat the process. If two possible prunings are tied for best, use
-the pruning that eliminates more nodes. Keep pruning until every possible chop would make
-your tree perform worse on the tuning set.
-
-
-
 In this tree, to classify a new representative we would first ask how s/he voted on Issue C.
 If the rep voted “yea”, ask about Issue A. Here a vote of “yea” or an abstention means a
 Democrat, while a vote of “nay” means a Republican. But if the rep voted “nay” on Issue C,
@@ -62,17 +49,18 @@ Examples of this being:
   - child_entropy in information_gain gets the weighted_child entropy --> only 2 labels means the other is implied
 """
 
+
 import argparse
 import math
-
-__author__ = "Emilee Oquist"    # Help ?
+import numpy as np
+__author__ = "Emilee Oquist"    #
 __license__ = "MIT"
 __date__ = "March 2023"
 
 
-# create an ArgumentParser object
+# ArgumentParser
 parser = argparse.ArgumentParser(
-    description='Python program for creating a binary decision tree that predicts the political party (Republican or Democrat) of a representative based on voting data.')
+    description='Python program for creating a decision tree.')
 parser.add_argument('filename', type=str, help='Path to the data file to use')
 args = parser.parse_args()
 filename = args.filename
@@ -82,8 +70,13 @@ vote_negative = '-'
 vote_positive = '+'
 vote_neutral = '.'
 
-class DecisionTreeBinaryClassifier:
-    def __init__(self, max_depth=None): # = None means optional
+# The example tree I have shown on the HW was never meant to be taken as the real answer.
+# But I will say that the pruned tree that I got has 19 nodes altogether, and that the root node is Issue F.
+# This tree has an estimated accuracy of ~95%. Hope that helps.
+
+
+class DecisionTreeClassifier:
+    def __init__(self, max_depth=None):  # = None means optional
         self.max_depth = max_depth
         self.tree = None
 
@@ -104,40 +97,62 @@ class DecisionTreeBinaryClassifier:
 
     def build_tree(self, X, y, depth):
         # Implement decision tree algorithm here
+        # First, you must create a decision tree and print it. To do this, there will be no test set.
         pass
-    
 
-def entropy(labels_list):
-    """
-    Computes the measure of impurity of training data for the binary tree.
-    The entropy of a set S in binary classification is  H(S) = -A log2(A) - B log2(B)
-    where A and B represent the two classes.
+    def build_tuning_set(self, dataset):
+        return dataset[::4]  # slicing
 
-    change up comment? also change p1 and p2
-    rewrite the math to be more my style
-    """
-    p1 = sum(1 for label in labels_list if label == 1) / len(labels_list)
-    p2 = 1 - p1
-    if p1 == 0 or p2 == 0:
-        return 0
-    else:
-        return -(p1 * math.log2(p1)) - (p2 * math.log2(p2))
+    # Calculate the entropy of the entire training set.
+    #     This represents the amount of information we need to classify a new, unknown datum of the same sort as was found in the training set.
+    # Calculate what the information gain would be, were we to split based on each feature, in turn.
+    # Choose the single best feature, and divide the data set into two or more discrete groups.
+    #     e.g. split based on medium, dividing the set into oil paintings, acrylic paintings, and watercolors.
+    # If a subgroup is not uniformly labeled, recurse.
 
+    def entropy(self, data, labels_list):
+        """
+        Computes the entropy of the given data for the decision tree.
+        """
+        entropy = 0
+        labels, counts = np.unique(data[labels_list], return_counts=True)
+        # entropy summation
+        for label in range(len(labels)):
+            probability = float(counts[label]) / float(len(data))
+            entropy += (probability * math.log2(probability))
+        # ensure that the entropy values are non-negative --> logs doing normal log things
+        return -(entropy)
 
-def information_gain(dataset, labels, feature):
-    """
-    Measure the quality (information gain) of a binary split on a feature.
+    def information_gain(self, data, labels, feature):
+        """
+        Measure the quality (information gain) of a feature split.
+        """
+        # Compute the entropy of the parent node
+        parent_entropy = self.entropy(data, labels)
 
-    change comment
-    watch a video or two on decision trees
-    """
-    # Compute the entropy of the parent node
-    parent_entropy = entropy(labels)
+        # Compute the entropy of the child nodes 
+        unique_values = np.unique(data[:, feature]) # "give me all rows in the data array, but only the column indexed by 'feature'."
+        child_entropies = []
+        for value in unique_values:
+            child_indices = data[:, feature] == value
+            child_labels = labels[child_indices]
+            if len(child_labels) == 0:
+                child_entropy = 0
+            else:
+                child_entropy = self.entropy(data[child_indices], child_labels)
+            child_entropies.append(child_entropy)
 
-    # Compute the entropy of the child nodes -
-    counts = [sum(labels == value) for value in [class_1, class_2]]
-    child_entropy = sum([(counts[i]/sum(counts)) *
-                        entropy(labels[dataset[feature] == i]) for i in [0, 1]])
+        # Compute the information gain
+        counts = [sum(labels == value) for value in np.unique(labels)]
+        child_weights
 
-    # Compute the information gain
-    return parent_entropy - child_entropy
+        # Compute the information gain
+        return parent_entropy - child_entropy
+
+# Pruning the tree is done by assessing your entire tree's current accuracy on the tuning set, and its accuracy
+# when each internal node is pruned. (A pruned node is one that is replaced by a leaf that
+# classifies a rep based on the majority of representatives in the training set who would have
+# reached that node.) If the best pruned tree is at least as good as the overall tree, making
+# the prune permanent and repeat the process. If two possible prunings are tied for best, use
+# the pruning that eliminates more nodes. Keep pruning until every possible chop would make
+# your tree perform worse on the tuning set.

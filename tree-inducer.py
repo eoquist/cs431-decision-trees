@@ -78,9 +78,9 @@ args = parser.parse_args()
 filename = args.filename
 
 # Hard-coding class labels
-class_1 = '-'
-class_2 = '+'
-class_3 = '.'
+vote_negative = '-'
+vote_positive = '+'
+vote_neutral = '.'
 
 class DecisionTreeBinaryClassifier:
     def __init__(self, max_depth=None): # = None means optional

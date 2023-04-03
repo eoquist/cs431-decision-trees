@@ -5,8 +5,11 @@ Description of the program up here
 
 import argparse
 import math
+# import string
+from string import ascii_uppercase
 import numpy as np
 import os.path
+
 
 __author__ = "Emilee Oquist"    #
 __license__ = "MIT"
@@ -28,22 +31,25 @@ class Representative():
 
 class Node():
     """ Decision Tree Classifier Node. """
-    def __init__(self, issue=None, yea_voters=None, abstained_voters=None, children=None, parent_majority=None, is_leaf=None):
+    def __init__(self, issue=None, representatives=None, children=None, parent_majority=None, is_leaf=None):
         """ Constructor for Node. """ 
-        self.issue = ""
-        self.num_issues = 0
+        self.issue = issue
+        self.representatives = representatives
         
         # Decision tree information
         self.children = children
         self.information_gain = 0
         self.is_leaf = is_leaf
 
+        # Edge case
+        self.parent_majority = parent_majority
+
 
 class DecisionTreeClassifier:
-    def __init__(self, depth=None):  # None --> optional
+    def __init__(self, root, depth=None,):  # None --> optional
         """ Constructor for DecisionTreeClassifier. """
+        self.root = root
         self.max_depth = depth
-        self.root - None
 
     def predict(self, data):
         """ Predicts the labels of the test data using the trained decision tree. """
@@ -174,21 +180,39 @@ if __name__ == "__main__":
     else:
         with open(filename, "r") as file:
             lines = file.readlines()
+            num_representatives = len(lines)
 
-        # Parse lines and store data in NumPy array
-        data = []
-        labels_list = np.unique()
+        list_of_representatives = np.array([])
+        num_issues = -1
+        issues_list = []
+
+        # Parse lines
         for one_line in lines:
             info = one_line.strip().split("\t")
             representative_ID = info[0]
-            label = info[1]
+            party = info[1]
             voting_record = info[2]
-            # Node
-            node = Node(ID=representative_ID, label=label, voting_record=voting_record)
-            data.append(node)
+            
+            representative = Representative(representative_ID, party, voting_record)
+            np.append(list_of_representatives,representative)
 
-        # Convert list to NumPy array
-        data = np.array(data)
+            if(num_issues is -1 or issues_list == [] ):
+                num_issues = len(voting_record)
+                issues_list = ascii_uppercase[:num_issues]
+        #
+        for issue in issues_list:
+
+        node = Node() # issue, representatives, children, parent_majority, is_leaf
+        node.issue = issue
+            
+            # Decision tree information
+            node.children = children
+            node.information_gain = 0
+            node.is_leaf = is_leaf
+
+            # Edge case
+            node.parent_majority = parent_majority
+        
 
         DT_classifier = DecisionTreeClassifier()
         DT_classifier.build_tree(data, labels_list, depth=0)

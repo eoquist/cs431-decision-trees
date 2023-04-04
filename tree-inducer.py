@@ -42,6 +42,7 @@ class Node():
         """ Constructor for Node. """ 
         # feature/inputs, labels/outputs, data
         self.issue = issue 
+        self.threshold_vote = None
         self.representatives = representatives
         self.party_count = party_count
         
@@ -56,6 +57,19 @@ class Node():
 
 
 class DecisionTreeClassifier:
+    """  
+    If you reach a point where you still have both Democrats and Republicans, but they all have the 
+    exact same voting record, create a leaf that classifies them as the majority left.
+
+    If you reach a point where there are still Democrats and Republicans, but they have different 
+    voting records even though the best information gain is 0, keep adding to the tree. Another 
+    issue may now be able to split them.
+
+    If a branch has 0 reps, or a tied number of indistinguishable reps, classify based on the
+    majority at its parent node. If this is tied too, keep going back up the tree until you
+    have a majority.
+     """
+    
     def __init__(self, root, issues_list=None, labels_list=None, vote_types=None, max_depth=None):  # None --> optional
         """ Constructor for DecisionTreeClassifier. """
         self.root = root
@@ -83,27 +97,31 @@ class DecisionTreeClassifier:
             self.print_tree(child,tab_indent_string)
 
 
+    def fit(self, data):
+        """ Tries to predict the label of the test datum using the trained decision tree. """
+        predictions = []
+        # prediction alg here
+
+        return predictions
+
+
     def build_tree(self, node, possible_splits, depth=None):
         """ Builds the decision tree. """
-        base_case = self.check_base_case()
-        if base_case is not None:
-            return base_case
-
+        # If samples belong to one class, return a leaf node --> (entropy 0)
+        if self.entropy(node) == 0:
+            return Node(representatives=node.representatives, is_leaf=True)
+        #   feature=None, threshold=None, left=None, right=None, info_gain=None, label=None
+        
+        
+        # else recurse
+        
         # Calculate what the information gain would be, were we to split based on each feature, in turn.
         best_split_issue, representative_split = self.get_best_split(node=node, data=node.representatives, possible_splits=self.issues_list)
         counts_dict, majority_party = self.count_party_instances_and_majority(representative_split)
-        decision_node = Node(issue=best_split_issue, representatives=representative_split, party_count=counts_dict, majority=majority_party, is_leaf=False) 
 
         # divide the data set into two or more discrete groups.
-
-        # If a subgroup is not uniformly labeled, recurse.
-
-
-    def check_base_case(self, node, max_depth=None):
-        """ Checks the terminating / base cases for the build_tree function. """
-        # Base case: if all samples belong to one class, return a leaf node
-        # entropy 0
-        # feature=None, threshold=None, left=None, right=None, info_gain=None, label=None
+        decision_node = Node(issue=best_split_issue, representatives=representative_split, party_count=counts_dict, majority=majority_party, is_leaf=False) 
+        
 
 
     def entropy(self, data):
@@ -116,6 +134,7 @@ class DecisionTreeClassifier:
             entropy += (probability * math.log2(probability))
         return -(entropy)
     
+
     def count_party_instances_and_majority(self, data):
         """ Count instances of parties. """
         party_minidict = {}
@@ -123,6 +142,7 @@ class DecisionTreeClassifier:
             party_minidict[label] = len(list(filter(lambda rep: rep.party == label, data)))
         majority_party = max(party_minidict, key=party_minidict.get)
         return party_minidict, majority_party
+
 
     def get_best_split(self, data, possible_splits):
         """ Get the issue that gives the best information gain. """
@@ -136,21 +156,6 @@ class DecisionTreeClassifier:
             if info_gain > best_info_gain:
                 best_info_gain = info_gain
                 best_split_issue = issue
-
-        """  
-        If you reach a point where you still have both Democrats and Republicans, but they all have the 
-        exact same voting record, create a leaf that classifies them as the majority left.
-
-        If you reach a point where there are still Democrats and Republicans, but they have different 
-        voting records even though the best information gain is 0, keep adding to the tree. Another 
-        issue may now be able to split them.
-
-        If a branch has 0 reps, or a tied number of indistinguishable reps, classify based on the
-        majority at its parent node. If this is tied too, keep going back up the tree until you
-        have a majority.
-        """
-        if best_info_gain == 0:
-            pass
 
         return best_split_issue, representative_split
 
@@ -171,22 +176,35 @@ class DecisionTreeClassifier:
         return information_gain, representative_split
 
 
+    def count_representative_vote_on_issue(self, data, issue):
+        """ Returns a dict with a key-value pair where the key is the party and the value is the number of
+        representatives who voted each symbol on that issue. """
+        counts = {}
+        for label in self.labels_list:
+            vote_counts = np.zeros(len(self.labels_list))
+            for idx, symbol in enumerate(self.vote_types):
+                vote_counts[idx] = len(list(filter(lambda rep: rep.voting_record[issue] == symbol, data)))
+            counts[label] = vote_counts
+        return counts
+    
+
     def build_tuning_set(self, dataset):
         """ Build the tuning set. """
         return dataset[::4]  # slicing
     
 
-    def leave_one_out_cross_validation(self):
+    def leave_one_out_cross_validation(self, data):
         """ Estimate the decision tree's accuracy. """
+        accuracy = 0
+        for index in range(len(data)):
+            data_with_left_out = data[:index] + data[index+1:]
+            """
+            For that datum, exclude it from the calculation and create a new decision tree as was done above. 
+            Then after it has been trained and tuned, test it on the left-out datum. Do this for all your data.
 
-        """
-        Loop through every datum. For that datum, exclude it from the calculation and create a new 
-        decision tree as was done above. Then after it has been trained and tuned, test it on the 
-        left-out datum. Do this for all your data.
-
-        Print out the accuracy on the left-out testing data as the estimate of your tree's 
-        data. Please do not print out the hundreds of trees you create for this step
-        """
+            Print out the accuracy on the left-out testing data as the estimate of your tree's 
+            data.
+            """
 
         pass
     

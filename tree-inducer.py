@@ -1,44 +1,26 @@
 """
-Description of the program up here 
-"""
+Political Decision Tree Classifier
 
+If you would like to modify the code to allow for a maximum_depth specification,
+the second to last line of the parse() function where DT_classifier is being 
+initialized is where you can hard code a maximum depth. If you would like a user
+to modify that - more must be changed.
+
+Hard coded:
+--> different vote type values: + - .
+--> output labels: D and R
+"""
 
 import argparse
 import math
-<<<<<<< HEAD
-__author__ = "Emilee Oquist"    # Help ?
-=======
-# import string
 from string import ascii_uppercase
 import numpy as np
 import os.path
 
-
 __author__ = "Emilee Oquist"    #
->>>>>>> 923188f0aabf7e223299443a40400010bf685a6e
 __license__ = "MIT"
 __date__ = "March 2023"
 
-
-<<<<<<< HEAD
-# create an ArgumentParser object
-parser = argparse.ArgumentParser(
-    description='Python program for creating a decision tree that predicts the political party (Republican or Democrat) of a representative based on voting data.')
-parser.add_argument('filename', type=str, help='Path to the data file to use')
-args = parser.parse_args()
-filename = args.filename
-
-# Hard-coded labels
-yea = '-'
-nay = '+'
-abstain = '.'
-
-
-class DecisionTreeClassifier:
-    def __init__(self, max_depth=None):  # = None means optional
-        self.max_depth = max_depth
-        self.tree = None
-=======
 
 # The example tree I have shown on the HW was never meant to be taken as the real answer.
 # But I will say that the pruned tree that I got has 19 nodes altogether, and that the root node is Issue F.
@@ -56,79 +38,88 @@ class Node():
     """ Decision Tree Classifier Node. """
     def __init__(self, issue=None, representatives=None, children=None, parent_majority=None, is_leaf=None):
         """ Constructor for Node. """ 
-        self.issue = issue
+        # feature/inputs, labels/outputs, data
+        self.issue = issue 
         self.representatives = representatives
         
         # Decision tree information
         self.children = children
         self.information_gain = 0
         self.is_leaf = is_leaf
->>>>>>> 923188f0aabf7e223299443a40400010bf685a6e
 
         # Edge case
         self.parent_majority = parent_majority
 
 
+
 class DecisionTreeClassifier:
-    def __init__(self, root, depth=None,):  # None --> optional
+    def __init__(self, root, issues_list=None, labels_list=None, vote_types=None, max_depth=None):  # None --> optional
         """ Constructor for DecisionTreeClassifier. """
         self.root = root
-        self.max_depth = depth
+        self.children = np.array([])
+        self.max_depth = max_depth
+        self.issues_list = issues_list
+        self.labels_list= labels_list
+        self.vote_types = vote_types
 
-    def predict(self, data):
-        """ Predicts the labels of the test data using the trained decision tree. """
-        predictions = []
-        for sample in X:
-            node = self.tree
-            while node.is_leaf() is False:
-                if sample[node.feature] <= node.threshold:
-                    node = node.left_child
-                else:
-                    node = node.right_child
-            predictions.append(node.label)
-        return predictions
+    def print_tree(self, node, tab_indent_string):
+        """ Prints the decision tree. """
+        if node is None:
+            return
+        
+        tab_indent_string = tab_indent_string + "\t"
 
-    def build_tree(self, training_data, labels_list, depth):
+        # Print the node's issue and political party
+        if(node == self.root): # bad obj comparison :()
+            print("Issue " + str(node.issue) + ":")
+        else:
+            print(tab_indent_string + "Issue " + str(node.issue) + ":")
+            print()
+
+        for child in node.children:
+            self.print_tree(child,)
+
+    def build_tree(self, node, depth):
+        """ Builds the decision tree. """
         base_case = self.check_base_case()
         if base_case is not None:
             return base_case
-        # Implement decision tree algorithm here
-        # First, you must create a decision tree and print it. To do this, there will be no test set.
 
         # Calculate the entropy of the entire training set.
-        #     This represents the amount of information we need to classify a new, unknown datum of the same sort as was found in the training set.
+        entropy = self.entropy(node)
+
         # Calculate what the information gain would be, were we to split based on each feature, in turn.
-        # Choose the single best feature, and divide the data set into two or more discrete groups.
-        #     e.g. split based on medium, dividing the set into oil paintings, acrylic paintings, and watercolors.
+        best_info_gain, best_split_issue = self.information_gain(data=node.representatives, possible_splits=self.issues_list)
+
+        # divide the data set into two or more discrete groups.
+
         # If a subgroup is not uniformly labeled, recurse.
-        pass
-<<<<<<< HEAD
 
 
-def entropy(labels_list):
-    """
-    Computes the measure of impurity of training data for the binary tree.
-    H(s) = - SUM ( slog2(s) ) ?
-    """
-    portion = 0
-    summation = 0
-    for index in range(len(labels_list)):
-        portion = sum(1 for label in labels_list if label ==
-                      labels_list[index]) / len(labels_list)
-        # only calculate entropy of + - ? how does the entropy function work?
-        summation += (portion * math.log2(portion))
-    return - summation
-=======
-
-    def print_tree(self, decision_tree):
-        """ Prints the decision tree. """
-        pass
-
-    def check_base_case(self, data, labels_list, depth):
+    def check_base_case(self, node, max_depth=None):
+        """ Checks the terminating / base cases for the build_tree function. """
         # Base case: if all samples belong to one class, return a leaf node
+        if len(data) == 1:
+            return Node(parent_label=labels[0], is_leaf=True)
+
+        """
+        If two issues have the same information gain, use the issue with the earlier letter.
+            
+        If you reach a point where you still have both Democrats and Republicans, but they all have the 
+        exact same voting record, create a leaf that classifies them as the majority left.
+
+        If you reach a point where there are still Democrats and Republicans, but they have different 
+        voting records even though the best information gain is 0, keep adding to the tree. Another 
+        issue may now be able to split them.
+
+        If a branch has 0 reps, or a tied number of indistinguishable reps, classify based on the
+        majority at its parent node. If this is tied too, keep going back up the tree until you
+        have a majority.
+        """
+        
         symbol = None
         for label in data:
-            if 
+            pass # !!!
         if len(data) == 1:
             return Node(data[0])
         # feature=None, threshold=None, left=None, right=None, info_gain=None, label=None
@@ -141,91 +132,72 @@ def entropy(labels_list):
 
     def build_tuning_set(self, dataset):
         """
-        You should do this as if the testing datum never existed. Print out the accuracy on the left-out testing data as the estimate of your tree's 
+        You should do this as if the testing datum never existed. 
+        
+        Print out the accuracy on the left-out testing data as the estimate of your tree's 
         data. Please do not print out the hundreds of trees you create for this step
         """
         return dataset[::4]  # slicing
->>>>>>> 923188f0aabf7e223299443a40400010bf685a6e
 
 
-    def entropy(self, data, labels_list):
-        """ Computes the entropy of the given labels for the decision tree which is used in information_gain. """
+    def entropy(self, data):
+        """ Computes the entropy of the given labels. """
         entropy = 0
-        labels, counts = np.unique(data[labels_list], return_counts=True)
+        count = self.count_party_instances(data)
         # entropy summation
-        for label in range(len(labels)):
-            probability = counts[label] / len(data)
+        for party_index in range(len(count)):
+            probability = count[party_index] / len(data)
             entropy += (probability * math.log2(probability))
         return -(entropy)
+    
+    def count_party_instances(representatives):
+        """ Count instances of democrats and republicans. """
+        dem_count = 0
+        rep_count = 0
+        for rep in representatives:
+            if rep.party == 'D':
+                dem_count += 1
+            elif rep.party == 'R':
+                rep_count += 1
+        return [dem_count, rep_count]
 
 
-    def information_gain(self, data, labels_list, feature):
+    def information_gain(self, data, possible_splits):
         """ Measure the quality (information gain) of a feature split. """
-        # Entropy of parent node
-        parent_entropy = self.entropy(data, labels_list)
+        parent_entropy = self.entropy(data)
 
-        for issue in voting_record
+        best_split_issue = ""
+        best_info_gain = 0
 
-        # Compute the entropy of the child nodes
-        labels, counts = np.unique(data[:, feature], return_counts=True)
-        child_entropy = 0
-        for value in labels:
-            subset_labels = labels_list[data[:, feature] == value]
-            child_entropy += (np.sum(counts[data[:, feature] == value]) /
-                              np.sum(counts)) * self.entropy(subset_labels)
+        for issue in range(len(possible_splits)):
+            for idx, symbol in enumerate(self.vote_types):
+                representative_split = np.array([rep for rep in data if rep.voting_record[idx] == symbol])
+                weighted_sum_split_entropy += (len(representative_split) / len(data)) * self.entropy(representative_split)
 
-        # Compute the information gain
-        return parent_entropy - child_entropy
+                #Calculate the information gained from the split
+                information_gain = parent_entropy - weighted_sum_split_entropy
+
+                if information_gain >= best_info_gain:
+                    best_info_gain = information_gain
+                    self.best_split_issue = issue
+        return best_info_gain, best_split_issue
     
+    def count_representative_vote_on_issue(self, data, issue):
+        return list(filter(lambda rep: rep.voting_record == 'D',self.representatives))
     
-    """
-    If two issues have the same information gain, use the issue with the earlier letter.
-        
-    If you reach a point where you still have both Democrats and Republicans, but they all have the 
-    exact same voting record, create a leaf that classifies them as the majority left.
 
-    If you reach a point where there are still Democrats and Republicans, but they have different 
-    voting records even though the best information gain is 0, keep adding to the tree. Another 
-    issue may now be able to split them.
+    def leave_one_out_cross_validation(self):
+        """ Estimate the decision tree's accuracy. """
 
-    If a branch has 0 reps, or a tied number of indistinguishable reps, classify based on the
-    majority at its parent node. If this is tied too, keep going back up the tree until you
-    have a majority.
-    """
+        """
+        Loop through every datum. For that datum, exclude it from
+        the calculation and create a new decision tree as was done above. Then after it has been
+        trained and tuned, test it on the left-out datum. Do this for all your data.
+        """
 
-<<<<<<< HEAD
-    # Compute the entropy of the child nodes -
-    # pretty sure this no longer makes sense
-    counts = [sum(labels == value) for value in [yea, nay, abstain]]
-    child_entropy = sum([(counts[i]/sum(counts)) *
-                        entropy(labels[dataset[feature] == i]) for i in [0, 1]])
+        pass
+    
 
-    # Compute the information gain
-    return parent_entropy - child_entropy
-
-
-def leave_one_out_cross_validation():
-    """
-    Second, you must estimate your decision tree’s accuracy. To do this, you will use
-    leave-one-out-cross-validation. Loop through every datum. For that datum, exclude it from
-    the calculation and create a new decision tree as was done above. Then after it has been
-    trained and tuned, test it on the left-out datum. Do this for all your data. (Note that when
-    taking out every fourth datum to be the tuning set, you should do this as if the testing
-    datum never existed.) Print out the accuracy on the left-out testing data as the estimate of
-    your tree’s data. Please do not print out the hundreds of trees you create for this step.
-    Your file should be called tree-inducer.py. Its single command-line argument will be the
-    data file to use.
-    """
-    pass
-=======
-
-"""
-Second, you must estimate your decision tree's accuracy. To do this, you will use
-leave-one-out-cross-validation. Loop through every datum. For that datum, exclude it from
-the calculation and create a new decision tree as was done above. Then after it has been
-trained and tuned, test it on the left-out datum. Do this for all your data.
-
-"""
 
 # Pruning the tree is done by assessing your entire tree's current accuracy on the tuning set, and its accuracy
 # when each internal node is pruned. (A pruned node is one that is replaced by a leaf that
@@ -235,6 +207,45 @@ trained and tuned, test it on the left-out datum. Do this for all your data.
 # the pruning that eliminates more nodes. Keep pruning until every possible chop would make
 # your tree perform worse on the tuning set.
 
+def parse(filename):
+    """ Parse the voting data file and create the decision tree. """
+    with open(filename, "r") as file:
+        lines = file.readlines()
+        num_representatives = len(lines)
+
+    list_of_representatives = np.array([])
+    party_minidict = {"D": 0, "R": 0}
+    num_issues = -1
+    issues_list = []
+
+    # Parse lines
+    for one_line in lines:
+        info = one_line.strip().split("\t")
+        representative_ID = info[0]
+        party = info[1]
+        voting_record = info[2]
+
+        if party in party_minidict:
+            party_minidict[party] += 1
+        else:
+            party_minidict[party] += 1
+            
+        representative = Representative(representative_ID, party, voting_record)
+        np.append(list_of_representatives,representative)
+
+        if(num_issues is -1 or issues_list == [] ):
+            num_issues = len(voting_record)
+            issues_list = ascii_uppercase[:num_issues]
+    # ----- ----- ----- ----- ----- #
+    majority_party = max(party_minidict, key=party_minidict.get)
+    parent_node = Node(issue=None, representatives=list_of_representatives, parent_majority=majority_party, is_leaf=False) 
+    # children & info_gain missing
+    labels = ['R',"D"]
+    vote_types = ["+","-","."]
+    DT_classifier = DecisionTreeClassifier(root=parent_node, issues_list=issues_list, labels_list=labels, vote_types=vote_types, max_depth=None)
+    DT_classifier.build_tree(node=DT_classifier.root, depth=DT_classifier.max_depth)
+
+    
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Python program for creating a decision tree.')
     parser.add_argument('filename', type=str, help='Path to the data file to use')
@@ -245,43 +256,4 @@ if __name__ == "__main__":
         print(f"Error: '{filename}' is not a valid file path.") # Python3.6+ f-strings
         exit(1)
     else:
-        with open(filename, "r") as file:
-            lines = file.readlines()
-            num_representatives = len(lines)
-
-        list_of_representatives = np.array([])
-        num_issues = -1
-        issues_list = []
-
-        # Parse lines
-        for one_line in lines:
-            info = one_line.strip().split("\t")
-            representative_ID = info[0]
-            party = info[1]
-            voting_record = info[2]
-            
-            representative = Representative(representative_ID, party, voting_record)
-            np.append(list_of_representatives,representative)
-
-            if(num_issues is -1 or issues_list == [] ):
-                num_issues = len(voting_record)
-                issues_list = ascii_uppercase[:num_issues]
-        #
-        for issue in issues_list:
-
-        node = Node() # issue, representatives, children, parent_majority, is_leaf
-        node.issue = issue
-            
-            # Decision tree information
-            node.children = children
-            node.information_gain = 0
-            node.is_leaf = is_leaf
-
-            # Edge case
-            node.parent_majority = parent_majority
-        
-
-        DT_classifier = DecisionTreeClassifier()
-        DT_classifier.build_tree(data, labels_list, depth=0)
-        pass
->>>>>>> 923188f0aabf7e223299443a40400010bf685a6e
+        parse(filename)

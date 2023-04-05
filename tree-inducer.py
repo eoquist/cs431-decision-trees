@@ -34,6 +34,9 @@ class Representative():
         self.party = party
         self.voting_record = voting_record
 
+    def __str__(self):
+        return self.representative_ID + " " + self.party + ": " + str(self.voting_record)
+
 
 
 class Node():
@@ -94,10 +97,10 @@ class DecisionTreeClassifier:
             print()
 
         for child in node.children:
-            self.print_tree(child,tab_indent_string)
+            self.print_tree(child, tab_indent_string)
 
 
-    def fit(self, data):
+    def fit(self, DTree, data):
         """ Tries to predict the label of the test datum using the trained decision tree. """
         predictions = []
         # prediction alg here
@@ -108,9 +111,9 @@ class DecisionTreeClassifier:
     def build_tree(self, node, possible_splits, depth=None):
         """ Builds the decision tree. """
         # If samples belong to one class, return a leaf node --> (entropy 0)
-        if self.entropy(node) == 0:
+        if self.entropy(node.representatives) == 0:
             return Node(representatives=node.representatives, is_leaf=True)
-        #   feature=None, threshold=None, left=None, right=None, info_gain=None, label=None
+        #   feature=None, threshold=None, info_gain=None, party=None
         
         
         # else recurse
@@ -127,11 +130,14 @@ class DecisionTreeClassifier:
     def entropy(self, data):
         """ Computes the entropy of the given labels. """
         entropy = 0
-        counts_dict = self.count_party_instances_and_majority(data)
+        counts_dict, _ = self.count_party_instances_and_majority(data)
+        
         # entropy summation
         for party in self.labels_list:
+            print("count " + party + ": " + str(counts_dict[party])) # !!!
             probability = counts_dict[party] / len(data)
             entropy += (probability * math.log2(probability))
+        print("entropy: " + str(-entropy)) # !!!
         return -(entropy)
     
 
@@ -223,7 +229,7 @@ def parse(filename):
     with open(filename, "r") as file:
         lines = file.readlines()
 
-    list_of_representatives = np.array([])
+    list_of_representatives = []
     num_issues = -1
     issues_list = []
     party_minidict = {"D": 0,"R": 0}
@@ -249,16 +255,18 @@ def parse(filename):
             voting_record[ascii_uppercase[i]] = voting_record_string[i]
             
         representative = Representative(representative_ID, party, voting_record)
-        np.append(list_of_representatives,representative)
+        list_of_representatives.append(representative)
 
     # ----- ----- ----- ----- ----- #
     majority_party = max(party_minidict, key=party_minidict.get)
+    print(majority_party + ": " + str(party_minidict[majority_party])) # !!!
     parent_node = Node(issue=None, representatives=list_of_representatives, party_count=None, majority=majority_party, is_leaf=False) 
+
     # children & info_gain missing
     labels = ["D","R"]
     vote_types = ["+","-","."]
     DT_classifier = DecisionTreeClassifier(root=parent_node, issues_list=issues_list, labels_list=labels, vote_types=vote_types, max_depth=None)
-    DT_classifier.build_tree(node=DT_classifier.root, depth=DT_classifier.max_depth)
+    DT_classifier.build_tree(node=DT_classifier.root, possible_splits=issues_list, depth=DT_classifier.max_depth)
 
     
 if __name__ == "__main__":
@@ -267,8 +275,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
     filename = args.filename
 
+    print("filename: " + filename) # !!!
+
     if not os.path.isfile(filename):
         print(f"Error: '{filename}' is not a valid file path.") # Python3.6+ f-strings
         exit(1)
-    else:
-        parse(filename)
+
+    parse(filename)
